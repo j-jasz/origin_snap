@@ -4,10 +4,11 @@ from bpy.types import Menu
 
 bl_info = {
     "name": "Origin2Selection",
-    "blender": (4, 0, 1),
+    "description": "Move Object Origin to selected part of the mesh.",
+    "version": (1, 0),
+    "blender": (4, 0, 2),
     "category": "Mesh",
 }
-
 
 def midpoint(vertices):
     return sum(vertices, mathutils.Vector()) / len(vertices)
