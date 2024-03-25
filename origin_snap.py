@@ -4,6 +4,7 @@ from bpy.types import Menu
 
 bl_info = {
     "name": "OriginSnap",
+    "author": "Jakub Jaszewski",
     "description": "Manipulate Object Origin position.",
     "version": (1, 0),
     "blender": (4, 0, 2),
