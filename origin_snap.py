@@ -121,8 +121,6 @@ classes = (
     ObjectToWorldOriginOperator,
 )
 
-# ~ addon_keymaps = []
-
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
@@ -132,30 +130,6 @@ def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     bpy.types.VIEW3D_MT_snap.remove(menu_func)
-
-# ~ def register():
-    # ~ for cls in classes:
-        # ~ bpy.utils.register_class(cls)
-    # ~ bpy.types.VIEW3D_MT_snap.append(menu_func)
-
-    # ~ wm = bpy.context.window_manager
-    # ~ kc = wm.keyconfigs.addon
-    # ~ if kc:
-        # ~ km = kc.keymaps.new(name='Mesh', space_type='VIEW_3D')
-        # ~ kmi = km.keymap_items.new(OriginToSelectionOperator.bl_idname, type='O', value='PRESS', shift=False, ctrl=True, alt=False)
-        # ~ addon_keymaps.append((km, kmi))
-
-# ~ def unregister():
-    # ~ bpy.types.VIEW3D_MT_snap.remove(menu_func)
-    # ~ for cls in classes:
-        # ~ bpy.utils.unregister_class(cls)
-
-    # ~ wm = bpy.context.window_manager
-    # ~ kc = wm.keyconfigs.addon
-    # ~ if kc:
-        # ~ for km, kmi in addon_keymaps:
-            # ~ km.keymap_items.remove(kmi)
-    # ~ addon_keymaps.clear()
 
 if __name__ == "__main__":
     register()
