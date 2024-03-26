@@ -1,9 +1,9 @@
 import bpy
 import mathutils
-from bpy.types import Menu
+from bpy.types import Menu, Operator
 
 bl_info = {
-    "name": "OriginSnap",
+    "name": "Origin Snap",
     "author": "Jakub Jaszewski",
     "description": "Manipulate Object Origin position.",
     "version": (1, 0),
@@ -16,6 +16,53 @@ def midpoint(vertices):
     if not vertices:
         return None
     return sum(vertices, mathutils.Vector()) / len(vertices)
+
+class ObjectToWorldOriginOperator(bpy.types.Operator):
+    bl_idname = "object.move_to_world_origin"
+    bl_label = "Object to World Origin"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
+
+    def execute(self, context):
+        obj = context.active_object
+        obj.location = (0, 0, 0)
+        return {'FINISHED'}
+
+class OriginToWorldOriginOperator(bpy.types.Operator):
+    bl_idname = "mesh.origin_to_world_origin"
+    bl_label = "Origin to World Origin"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
+
+    def execute(self, context):
+        obj = context.active_object
+        mesh = obj.data
+
+        mode = bpy.context.active_object.mode
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+        # Get object origin location
+        origin_offset = obj.location
+
+        # Get selected vertices' coordinates
+        vertices = [v.co for v in bpy.context.active_object.data.vertices]
+
+        # Adjust the mesh data vertices position by location offset
+        for vertex in mesh.vertices:
+            vertex.co += origin_offset
+
+        # Move object origin to world origin
+        obj.location = (0, 0, 0)
+
+        bpy.ops.object.mode_set(mode=mode)
+
+        return {'FINISHED'}
 
 class OriginToSelectionOperator(bpy.types.Operator):
     bl_idname = "mesh.origin_to_selection"
@@ -62,75 +109,65 @@ class OriginToSelectionOperator(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class OriginToWorldOriginOperator(bpy.types.Operator):
-    bl_idname = "mesh.origin_to_world_origin"
-    bl_label = "Origin to World Origin"
-    bl_options = {'REGISTER', 'UNDO'}
+#====================================================
 
-    @classmethod
-    def poll(cls, context):
-        return context.active_object is not None
+class VIEW_MT_PIE_origin_snap(Menu):
+    bl_label = "Origin / Object Snap"
 
-    def execute(self, context):
-        obj = context.active_object
-        mesh = obj.data
+    def draw(self, context):
+        layout = self.layout
 
-        mode = bpy.context.active_object.mode
-        bpy.ops.object.mode_set(mode='OBJECT')
+        pie = layout.menu_pie()
+        pie.operator("object.move_to_world_origin", text="Object to World Origin")
+        pie.operator("mesh.origin_to_selection", text="Origin to Selection")
+        pie.operator("mesh.origin_to_world_origin", text="Origin to World Origin")
 
-        # Get object origin location
-        origin_offset = obj.location
-
-        # Get selected vertices' coordinates
-        vertices = [v.co for v in bpy.context.active_object.data.vertices]
-
-        # Adjust the mesh data vertices position by location offset
-        for vertex in mesh.vertices:
-            vertex.co += origin_offset
-
-        # Move object origin to world origin
-        obj.location = (0, 0, 0)
-
-        bpy.ops.object.mode_set(mode=mode)
-
-        return {'FINISHED'}
-
-class ObjectToWorldOriginOperator(bpy.types.Operator):
-    bl_idname = "object.move_to_world_origin"
-    bl_label = "Object to World Origin"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    @classmethod
-    def poll(cls, context):
-        return context.active_object is not None
-
-    def execute(self, context):
-        obj = context.active_object
-        obj.location = (0, 0, 0)
-        return {'FINISHED'}
+#====================================================
 
 def menu_func(self, context):
     layout = self.layout
     layout.separator()
+    layout.operator(ObjectToWorldOriginOperator.bl_idname, text="Object to World Origin")
     layout.operator(OriginToSelectionOperator.bl_idname, text="Origin to Selection")
     layout.operator(OriginToWorldOriginOperator.bl_idname, text="Origin to World Origin")
-    layout.operator(ObjectToWorldOriginOperator.bl_idname, text="Object to World Origin")
 
 classes = (
+    ObjectToWorldOriginOperator,
     OriginToSelectionOperator,
     OriginToWorldOriginOperator,
-    ObjectToWorldOriginOperator,
 )
+
+addon_keymaps = []
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.VIEW3D_MT_snap.append(menu_func)
+    bpy.utils.register_class(VIEW_MT_PIE_origin_snap)
+
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+
+    if kc:
+        km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
+        kmi = km.keymap_items.new("wm.call_menu_pie", 'W', 'PRESS', ctrl=True)
+        addon_keymaps.append((km, kmi))
+        kmi.properties.name = "VIEW_MT_PIE_origin_snap"
+        addon_keymaps.append((km, kmi))
 
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     bpy.types.VIEW3D_MT_snap.remove(menu_func)
+    bpy.utils.unregister_class(VIEW_MT_PIE_origin_snap)
+
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+
+    if kc:
+        for km, kmi in addon_keymaps:
+            km.keymap_items.remove(kmi)
+        addon_keymaps.clear()
 
 if __name__ == "__main__":
     register()
