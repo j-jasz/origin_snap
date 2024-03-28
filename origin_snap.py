@@ -1,5 +1,7 @@
 import bpy
+import bmesh
 import mathutils
+from bpy import context
 from bpy.types import Menu, Operator
 
 bl_info = {
@@ -10,12 +12,6 @@ bl_info = {
     "blender": (4, 0, 2),
     "category": "Mesh",
 }
-
-# Reusable function for calculating midpoint
-def midpoint(vertices):
-    if not vertices:
-        return None
-    return sum(vertices, mathutils.Vector()) / len(vertices)
 
 class ObjectToWorldOriginOperator(bpy.types.Operator):
     bl_idname = "object.move_to_world_origin"
@@ -47,17 +43,11 @@ class OriginToWorldOriginOperator(bpy.types.Operator):
         mode = bpy.context.active_object.mode
         bpy.ops.object.mode_set(mode='OBJECT')
 
-        # Get object origin location
         origin_offset = obj.location
-
-        # Get selected vertices' coordinates
         vertices = [v.co for v in bpy.context.active_object.data.vertices]
 
-        # Adjust the mesh data vertices position by location offset
         for vertex in mesh.vertices:
             vertex.co += origin_offset
-
-        # Move object origin to world origin
         obj.location = (0, 0, 0)
 
         bpy.ops.object.mode_set(mode=mode)
@@ -76,36 +66,21 @@ class OriginToSelectionOperator(bpy.types.Operator):
     def execute(self, context):
         obj = context.active_object
         mesh = obj.data
+        bm = bmesh.from_edit_mesh(mesh)
 
-        if context.mode != 'EDIT_MESH':
-            self.report({'ERROR'}, "Please switch to Edit Mode.")
-            return {'CANCELLED'}
-
-        if len(mesh.vertices) == 0:
+        vertices = [v.co for v in bm.verts if v.select]
+        if len(vertices) == 0:
             self.report({'ERROR'}, "No vertices selected.")
             return {'CANCELLED'}
 
-        # Store active mode
-        mode = bpy.context.active_object.mode
+        midpoint = mathutils.Vector()
+        midpoint += sum(vertices, mathutils.Vector()) / len(vertices)
 
-        # Switch to object mode
-        bpy.ops.object.mode_set(mode='OBJECT')
+        for v in bm.verts:
+            v.co -= midpoint
+        obj.location += midpoint
 
-        # Get selected vertices' coordinates
-        vertices = [v.co for v in bpy.context.active_object.data.vertices if v.select]
-
-        # Calculate the midpoint
-        v_mid_point = midpoint(vertices)
-
-        # Move object origin to midpoint
-        obj.location += v_mid_point
-
-        # Adjust the mesh data vertices to maintain their positions relative to the new origin
-        for vertex in mesh.vertices:
-            vertex.co -= v_mid_point
-
-        # Switch back to previous mode
-        bpy.ops.object.mode_set(mode=mode)
+        bmesh.update_edit_mesh(mesh)
 
         return {'FINISHED'}
 
