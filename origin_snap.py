@@ -86,7 +86,7 @@ class OriginToSelectionOperator(bpy.types.Operator):
 
 #====================================================
 
-class VIEW_MT_PIE_origin_snap(Menu):
+class OriginSnap(Menu):
     bl_label = "Origin / Object Snap"
 
     def draw(self, context):
@@ -118,7 +118,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.VIEW3D_MT_snap.append(menu_func)
-    bpy.utils.register_class(VIEW_MT_PIE_origin_snap)
+    bpy.utils.register_class(OriginSnap)
 
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
@@ -134,7 +134,7 @@ def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     bpy.types.VIEW3D_MT_snap.remove(menu_func)
-    bpy.utils.unregister_class(VIEW_MT_PIE_origin_snap)
+    bpy.utils.unregister_class(OriginSnap)
 
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
