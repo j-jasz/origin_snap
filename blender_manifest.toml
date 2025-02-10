@@ -1,0 +1,24 @@
+schema_version = "1.0.0"
+id = "origin_snap"
+name = "Origin Snap"
+version = "2.0.0"
+tagline = "Manipulate object origin"
+maintainer = "Jakub Jaszewski"
+type = "add-on"
+tags = ["Mesh"]
+blender_version_min = "4.2.0"
+license = ["SPDX:GPL-3.0-or-later",]
+website = "https://github.com/j-jasz/camera_switcher"
+copyright = [
+    "2024-2025 Jakub Jaszewski"
+]
+
+[build]
+paths_exclude_pattern = [
+  ".git/",
+  ".vscode/",
+  "__pycache__/",
+  "resources/",
+  "*.gitignore",
+  "artifacts/"
+]
