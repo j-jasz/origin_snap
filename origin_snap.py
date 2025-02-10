@@ -8,7 +8,7 @@ bl_info = {
     "name": "Origin Snap",
     "author": "Jakub Jaszewski",
     "description": "Manipulate Object Origin position.",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (4, 0, 2),
     "category": "Mesh",
 }
@@ -101,7 +101,7 @@ class OriginSnap(Menu):
 
 def menu_func(self, context):
     layout = self.layout
-    layout.separator()
+    layout.operator("object.origin_set", text="Origin to Geometry").type = 'GEOMETRY_ORIGIN'
     layout.operator(ObjectToWorldOriginOperator.bl_idname, text="Object to World Origin")
     layout.operator(OriginToSelectionOperator.bl_idname, text="Origin to Selection")
     layout.operator(OriginToWorldOriginOperator.bl_idname, text="Origin to World Origin")
@@ -126,7 +126,6 @@ def register():
     if kc:
         km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
         kmi = km.keymap_items.new("wm.call_menu_pie", 'W', 'PRESS', ctrl=True)
-        addon_keymaps.append((km, kmi))
         kmi.properties.name = "VIEW_MT_PIE_origin_snap"
         addon_keymaps.append((km, kmi))
 
@@ -141,7 +140,8 @@ def unregister():
 
     if kc:
         for km, kmi in addon_keymaps:
-            km.keymap_items.remove(kmi)
+            if kmi in km.keymap_items:
+                km.keymap_items.remove(kmi)
         addon_keymaps.clear()
 
 if __name__ == "__main__":
