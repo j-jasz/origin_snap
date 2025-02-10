@@ -11,4 +11,4 @@ Known issues
 - undo works in multiple steps.
 - does not work in Sculpt mode due to keybinding conflict
 
-Tested Blender versions: 4.0.2, 4.2.0 (3805974b6fa8)
+Tested Blender versions: 4.2.6, 4.4.0 (b7ce99757461)
