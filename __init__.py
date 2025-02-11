@@ -144,10 +144,12 @@ def unregister():
     kc = wm.keyconfigs.addon
 
     if kc:
-        for km, kmi in addon_keymaps:
-            if kmi in km.keymap_items:
+        for km, kmi in list(addon_keymaps):
+            try:
                 km.keymap_items.remove(kmi)
-        addon_keymaps.clear()
+            except ValueError:
+                print(f"Warning: Keymap item {kmi} not found in keymap {km.name}.  It may have already been removed.")
+            addon_keymaps.remove((km, kmi))
 
 if __name__ == "__main__":
     register()
