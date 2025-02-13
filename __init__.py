@@ -3,7 +3,7 @@ bl_info = {
     "category": "Mesh",
     "author": "Jakub Jaszewski",
     "description": "Manipulate Object Origin position.",
-    "version": (2, 0),
+    "version": (2, 1),
     "blender": (4, 2, 0),
     "tracker_url": "https://github.com/j-jasz/origin_snap/issues",
 }
@@ -101,6 +101,8 @@ class VIEW_MT_PIE_OriginSnap(bpy.types.Menu):
         pie.operator("mesh.origin_to_world_origin", text="Origin to World Origin")
         op = pie.operator("object.origin_set", text="Origin to Geometry")
         op.type = 'ORIGIN_GEOMETRY'
+        op = pie.operator("object.origin_set", text="Geometry to Origin")
+        op.type = 'GEOMETRY_ORIGIN'
 
 #====================================================
 
@@ -109,7 +111,8 @@ def menu_func(self, context):
     layout.operator(ObjectToWorldOriginOperator.bl_idname, text="Object to World Origin")
     layout.operator(OriginToSelectionOperator.bl_idname, text="Origin to Selection")
     layout.operator(OriginToWorldOriginOperator.bl_idname, text="Origin to World Origin")
-    layout.operator("object.origin_set", text="Origin to Geometry").type = 'GEOMETRY_ORIGIN'
+    layout.operator("object.origin_set", text="Origin to Geometry").type = 'ORIGIN_GEOMETRY'
+    layout.operator("object.origin_set", text="Geometry to Origin").type = 'GEOMETRY_ORIGIN'
 
 classes = (
     ObjectToWorldOriginOperator,

@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 id = "origin_snap"
 name = "Origin Snap"
-version = "2.0.1"
+version = "2.1.0"
 tagline = "Manipulate object origin"
 maintainer = "Jakub Jaszewski"
 type = "add-on"
